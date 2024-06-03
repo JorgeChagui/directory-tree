@@ -1,0 +1,6 @@
+# Dependency directories
+node_modules/
+
+# Coverage directory used by tools like Jest
+coverage
+*.lcov

@@ -1,0 +1,15 @@
+{
+  "name": "directory_tree",
+  "version": "1.0.0",
+  "main": "directories.js",
+  "scripts": {
+    "test": "jest",
+    "coverage": "jest --coverage"
+  },
+  "author": "Jorge Chagui",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "jest": "^29.7.0"
+  }
+}
