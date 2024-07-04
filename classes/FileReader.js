@@ -9,20 +9,16 @@ class FileReader {
   }
 
   async readFile() {
-    try {
-      const rl = createInterface({
-        input: createReadStream(this.inputFileName),
-        crlfDelay: Infinity,
-      });
+    const rl = createInterface({
+      input: createReadStream(this.inputFileName),
+      crlfDelay: Infinity,
+    });
 
-      rl.on("line", (line) => {
-        this.#lines.push(line);
-      });
+    rl.on("line", (line) => {
+      this.#lines.push(line);
+    });
 
-      await once(rl, "close");
-    } catch (err) {
-      console.error(err);
-    }
+    await once(rl, "close");
   }
 
   get lines() {

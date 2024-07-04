@@ -1,6 +1,6 @@
 class Directory {
-  _children = [];
-  _level;
+  #children = [];
+  #level;
 
   constructor(name, level) {
     this.name = name;
@@ -8,19 +8,26 @@ class Directory {
   }
 
   set level(level) {
-    this._level = level;
-    for (const child of this._children) {
-      child.level = this._level + 1;
+    this.#level = level;
+    for (const child of this.#children) {
+      child.level = this.#level + 1;
     }
   }
 
   get level() {
-    return this._level;
+    return this.#level;
+  }
+
+  get children() {
+    return this.#children;
   }
 
   findChild(childPath) {
+    if ([undefined, null].includes(childPath)) {
+      throw new Error(`Path is not valid`);
+    }
     const [childName, ...childrenNameRest] = childPath.split("/");
-    let selectedChild = this._children.find(
+    let selectedChild = this.#children.find(
       (currentChild) => currentChild.name === childName
     );
     if (!selectedChild) {
@@ -40,46 +47,46 @@ class Directory {
   }
 
   sortChildren() {
-    this._children = this._children.sort((childOne, childTwo) =>
+    this.#children = this.#children.sort((childOne, childTwo) =>
       childOne.name.localeCompare(childTwo.name)
     );
   }
 
   addChild(newChild) {
-    const childFound = this._children.find(
+    const childFound = this.#children.find(
       (currentChild) => currentChild.name === newChild.name
     );
 
     // If the child doesn't exist just add it
     if (!childFound) {
       newChild.level = this.level + 1;
-      this._children.push(newChild);
+      this.#children.push(newChild);
       this.sortChildren();
       return;
     }
 
     // If the child does exist, merge children
-    for (const innerChildren of newChild._children) {
+    for (const innerChildren of newChild.children) {
       childFound.addChild(innerChildren);
     }
   }
 
   removeChild(childToRemove) {
-    const childFoundIndex = this._children.findIndex(
+    const childFoundIndex = this.#children.findIndex(
       (currentChild) => currentChild.name === childToRemove.name
     );
-    this._children.splice(childFoundIndex, 1);
+    this.#children.splice(childFoundIndex, 1);
   }
 
   createChild(childPath) {
     const [childName, ...children] = childPath.split("/");
     // Validate if the child exists
-    let childFound = this._children.find(
+    let childFound = this.#children.find(
       (currentChild) => currentChild.name === childName
     );
     if (!childFound) {
       childFound = new Directory(childName, this.level + 1);
-      this._children.push(childFound);
+      this.#children.push(childFound);
       this.sortChildren();
     }
 
@@ -89,6 +96,12 @@ class Directory {
   }
 
   moveChild(childPathToMove, childPathTarget) {
+    if ([undefined, null].includes(childPathToMove)) {
+      throw `Source path is not valid`;
+    }
+    if ([undefined, null].includes(childPathTarget)) {
+      throw `Target path is not valid`;
+    }
     let targetChild, childToMove;
     try {
       targetChild = this.findChild(childPathTarget);
@@ -111,18 +124,28 @@ class Directory {
   }
 
   list() {
-    const tabs = "  ".repeat(this.level - 1);
-    if (!this._children.length) {
-      return `${tabs}${this.name}`;
+    let currentDirectory = this.#listCurrentDirectory();
+    if (!this.#children.length) {
+      return currentDirectory;
     }
 
+    let childrenList = this.#listChildren();
+
+    return `${currentDirectory}\n${childrenList}`;
+  }
+
+  #listCurrentDirectory() {
+    const tabs = "  ".repeat(this.level - 1);
+    return `${tabs}${this.name}`;
+  }
+
+  #listChildren() {
     let childrenList = "";
-    for (const [index, child] of this._children.entries()) {
-      let newline = index === this._children.length - 1 ? "" : "\n";
+    for (const [index, child] of this.#children.entries()) {
+      let newline = index === this.#children.length - 1 ? "" : "\n";
       childrenList += `${child.list()}${newline}`;
     }
-
-    return `${tabs}${this.name}\n${childrenList}`;
+    return childrenList;
   }
 }
 

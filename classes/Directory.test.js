@@ -19,6 +19,12 @@ describe("Directory", () => {
       }).toThrow("fruits does not exist");
     });
 
+    test("findChild() throws error when the provided path is undefined", () => {
+      expect(() => {
+        dir.findChild();
+      }).toThrow("Path is not valid");
+    });
+
     test("findChild() finds the provided child", () => {
       const result = dir.findChild("grains/cereal");
       expect(result.parent.name).toEqual("grains");
@@ -40,25 +46,25 @@ describe("Directory", () => {
 
     test("createChild() creates the provided children", () => {
       dir.createChild("grains/cereal");
-      expect(dir._children[0].name).toEqual("grains");
-      expect(dir._children[0]._children[0].name).toEqual("cereal");
+      expect(dir.children[0].name).toEqual("grains");
+      expect(dir.children[0].children[0].name).toEqual("cereal");
     });
 
     test("createChild() creates the provided children and reorder it", () => {
       dir.createChild("grains/cereal");
       dir.createChild("fruits/apple");
-      expect(dir._children[0].name).toEqual("fruits");
-      expect(dir._children[0]._children[0].name).toEqual("apple");
-      expect(dir._children[1].name).toEqual("grains");
-      expect(dir._children[1]._children[0].name).toEqual("cereal");
+      expect(dir.children[0].name).toEqual("fruits");
+      expect(dir.children[0].children[0].name).toEqual("apple");
+      expect(dir.children[1].name).toEqual("grains");
+      expect(dir.children[1].children[0].name).toEqual("cereal");
     });
 
     test("createChild() creates the provided children when the one of the child already exists", () => {
       dir.createChild("fruits/orange");
       dir.createChild("fruits/apple");
-      expect(dir._children[0].name).toEqual("fruits");
-      expect(dir._children[0]._children[0].name).toEqual("apple");
-      expect(dir._children[0]._children[1].name).toEqual("orange");
+      expect(dir.children[0].name).toEqual("fruits");
+      expect(dir.children[0].children[0].name).toEqual("apple");
+      expect(dir.children[0].children[1].name).toEqual("orange");
     });
   });
 
@@ -78,9 +84,9 @@ describe("Directory", () => {
 
     test("moveChild() moves the provided child to the target folder", () => {
       dir.moveChild("grains", "foods");
-      expect(dir._children[0].name).toEqual("foods");
-      expect(dir._children[0]._children[0].name).toEqual("grains");
-      expect(dir._children[0]._children[0]._children[0].name).toEqual("cereal");
+      expect(dir.children[0].name).toEqual("foods");
+      expect(dir.children[0].children[0].name).toEqual("grains");
+      expect(dir.children[0].children[0].children[0].name).toEqual("cereal");
     });
 
     test("moveChild() fails when the provided children doesn't exist", () => {
@@ -89,11 +95,23 @@ describe("Directory", () => {
       }).toThrow("Cannot move meat - meat does not exist");
     });
 
+    test("moveChild() fails when the provided source path is undefined", () => {
+      expect(() => {
+        dir.moveChild(undefined, "foods");
+      }).toThrow("Source path is not valid");
+    });
+
+    test("moveChild() fails when the provided target path is undefined", () => {
+      expect(() => {
+        dir.moveChild("meat");
+      }).toThrow("Target path is not valid");
+    });
+
     test("moveChild() moves the provided child to the target folder and the provided child already exist in the target, so children are merged", () => {
       dir.moveChild("other_fruit/apple", "fruits");
-      expect(dir._children[1].name).toEqual("fruits");
-      expect(dir._children[1]._children[0].name).toEqual("apple");
-      expect(dir._children[1]._children[0]._children[0].name).toEqual(
+      expect(dir.children[1].name).toEqual("fruits");
+      expect(dir.children[1].children[0].name).toEqual("apple");
+      expect(dir.children[1].children[0].children[0].name).toEqual(
         "green_apple"
       );
     });
@@ -115,7 +133,7 @@ describe("Directory", () => {
 
     test("deleteChild() deletes the provided directory", () => {
       dir.deleteChild("grains");
-      const childrenNames = dir._children.map((child) => child.name);
+      const childrenNames = dir.children.map((child) => child.name);
       ["grains"].map((directoryName) =>
         expect(childrenNames).not.toContain(directoryName)
       );
